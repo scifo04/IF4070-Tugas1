@@ -1,0 +1,220 @@
+╔══════════════════════════════════════════════════════════════════╗
+║         PROLOG QUICK REFERENCE - College Course System           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+📚 LOADING FILES
+────────────────────────────────────────────────────────────────────
+?- [college_course_rules].      % Load main rules
+?- [test_queries].              % Load tests
+?- quick_start.                 % Show quick start menu
+
+🔍 BASIC QUERIES
+────────────────────────────────────────────────────────────────────
+?- list_all_courses.                              % List all courses
+?- print_statistics.                              % Show stats
+?- course_info('EB2101').                        % Course details
+?- course('EB2101', Name, Credits).              % Get course data
+
+🔎 SEARCH & FILTER
+────────────────────────────────────────────────────────────────────
+?- search_course_by_name('Biomedis', Results).   % Search by name
+?- courses_at_level('Third Year', Courses).      % Filter by level
+?- courses_in_department('Biomedical Engineering', Courses).
+?- courses_with_credits(3, Courses).             % Filter by credits
+
+📊 CATEGORIZATION
+────────────────────────────────────────────────────────────────────
+?- course_level('EB2101', Level).                % Get course level
+?- course_department('EB2101', Dept).            % Get department
+?- is_practical_course('EB2209').                % Check if practical
+?- is_thesis_course('EB4090').                   % Check if thesis
+?- is_heavy_course('EL2001').                    % Check if 4+ credits
+?- is_light_course('EL1200').                    % Check if <= 2 credits
+
+💳 CREDIT CALCULATIONS
+────────────────────────────────────────────────────────────────────
+?- total_credits(['EB2101', 'EB2102'], Total).   % Sum credits
+?- meets_credit_requirement([...], 144).         % Check requirement
+
+📋 PREREQUISITES
+────────────────────────────────────────────────────────────────────
+?- prerequisite('EL3010', PreReq).               % Get prerequisites
+?- can_take_course('EL3010', ['EL2007']).       % Check eligibility
+?- suggest_next_courses(['EL1200'], 'Third Year', Suggestions).
+
+🧪 TESTING
+────────────────────────────────────────────────────────────────────
+?- test_all.                                     % Run all tests
+?- test_basic_queries.                          % Test basics
+?- test_course_categorization.                  % Test categories
+?- test_credit_calculations.                    % Test credits
+?- test_prerequisites.                          % Test prereqs
+?- test_search_functions.                       % Test search
+?- run_all_scenarios.                           % Run scenarios
+
+📝 USAGE SCENARIOS
+────────────────────────────────────────────────────────────────────
+?- scenario_plan_semester.                       % Plan courses
+?- scenario_check_graduation.                    % Check credits
+?- scenario_find_by_topic.                      % Find by topic
+?- scenario_analyze_load.                       % Analyze workload
+
+📈 STATISTICS & LISTING
+────────────────────────────────────────────────────────────────────
+?- list_courses_by_department('Biomedical Engineering').
+?- list_courses_by_department('Electrical Engineering').
+?- findall(C, is_practical_course(C), Practical).
+?- findall(C, is_thesis_course(C), Thesis).
+
+🔧 UTILITY
+────────────────────────────────────────────────────────────────────
+?- listing(course).                              % Show all courses
+?- listing(prerequisite).                        % Show prerequisites
+?- working_directory(CWD, CWD).                 % Check directory
+?- help.                                        % Prolog help
+?- halt.                                        % Exit Prolog
+
+➕ ADDING DATA
+────────────────────────────────────────────────────────────────────
+?- assertz(course('NEW123', 'New Course', 4)).
+?- assertz(prerequisite('ADV101', 'BASIC101')).
+
+🎯 COURSE ID FORMAT
+────────────────────────────────────────────────────────────────────
+XX Y ZZZ
+││ │ └── Course number
+││ └──── Level: 1-4 (Undergrad), 5/7 (Masters), 8 (Doctoral)
+│└────── Department code
+└─────── EB = Biomedical, EL = Electrical, EI = Graduate
+
+Examples:
+  EB2101 = Biomedical Engineering, Year 2, Course 101
+  EL3010 = Electrical Engineering, Year 3, Course 010
+  EI7001 = Graduate Electrical, Masters level
+
+📚 SAMPLE COURSES
+────────────────────────────────────────────────────────────────────
+Biomedical:
+  EB2101 - Dasar Teknik Biomedis (2 credits)
+  EB3103 - Pengolahan Sinyal Biomedis (3 credits)
+  EB4090 - Tugas Akhir (4 credits)
+
+Electrical:
+  EL2001 - Rangkaian Elektrik (4 credits)
+  EL3010 - Pengolahan Sinyal Digital (3 credits)
+  EL4091 - Tugas Akhir (3 credits)
+
+Graduate:
+  EI7001 - Kendali Optimal & Kokoh (4 credits)
+  EI7011 - Metodologi Penelitian (3 credits)
+
+💡 USEFUL PATTERNS
+────────────────────────────────────────────────────────────────────
+% Find all courses matching criteria
+?- findall(ID, (course(ID, Name, Credits), Credits > 3), Heavy).
+
+% Count courses
+?- findall(C, course(C, _, _), All), length(All, Count).
+
+% Get all in department
+?- findall(ID, course_department(ID, 'Biomedical Engineering'), BM).
+
+% Filter and display
+?- forall(
+    (course(ID, Name, 3), course_level(ID, 'Third Year')),
+    format('~w - ~w~n', [ID, Name])
+).
+
+🚀 QUICK START EXAMPLE
+────────────────────────────────────────────────────────────────────
+% 1. Load the system
+?- [college_course_rules].
+
+% 2. View statistics
+?- print_statistics.
+
+% 3. Search for a topic
+?- search_course_by_name('Sinyal', Results).
+
+% 4. Get course details
+?- course_info('EB3103').
+
+% 5. Plan next semester
+?- suggest_next_courses(['EB2101', 'EB2102'], 'Third Year', S).
+
+% 6. Calculate credits
+?- total_credits(['EB2101', 'EB2102', 'EB2103'], Total).
+
+🐛 TROUBLESHOOTING
+────────────────────────────────────────────────────────────────────
+Problem: File not found
+Solution: ?- working_directory(CWD, CWD).
+         Check you're in the right directory
+
+Problem: No results
+Solution: ?- listing(course).
+         Verify courses are loaded
+
+Problem: Syntax error
+Solution: Check for missing periods (.) and parentheses
+
+Problem: Unexpected behavior
+Solution: ?- trace.  % Enable debugging
+         ?- notrace. % Disable debugging
+
+📖 DOCUMENTATION FILES
+────────────────────────────────────────────────────────────────────
+- README.md              : Main project overview
+- README_PROLOG.md       : Detailed Prolog guide
+- SOLUTION_SUMMARY.md    : Complete documentation
+- QUICK_REFERENCE.txt    : This file
+
+🎓 COMMON TASKS
+────────────────────────────────────────────────────────────────────
+Task: Find all biomedical courses
+?- courses_in_department('Biomedical Engineering', BM),
+   forall(member(ID, BM), course_info(ID)).
+
+Task: Check if can graduate
+?- StudentCourses = ['EB2101', 'EB2102', ...],
+   meets_credit_requirement(StudentCourses, 144).
+
+Task: Find courses I can take
+?- Completed = ['EL1200', 'EL2001'],
+   suggest_next_courses(Completed, 'Third Year', Next).
+
+Task: Analyze my semester
+?- Planned = ['EB3101', 'EB3102', 'EB3103'],
+   total_credits(Planned, Credits),
+   findall(C, (member(C, Planned), is_heavy_course(C)), Heavy),
+   length(Heavy, NumHeavy).
+
+⌨️ KEYBOARD SHORTCUTS (in SWI-Prolog)
+────────────────────────────────────────────────────────────────────
+Ctrl+C      : Interrupt/abort current query
+;           : See next solution
+.           : Stop after current solution
+↑/↓         : Navigate command history
+Tab         : Auto-complete
+Ctrl+D      : Exit (same as halt.)
+
+💾 SAVING RESULTS
+────────────────────────────────────────────────────────────────────
+% Tell Prolog to write to file
+?- tell('results.txt').
+?- list_all_courses.
+?- told.
+
+% Or use with/1
+?- with_output_to(file('output.txt'), list_all_courses).
+
+🔗 USEFUL LINKS
+────────────────────────────────────────────────────────────────────
+SWI-Prolog Manual: https://www.swi-prolog.org/pldoc/doc_for?object=manual
+SWI-Prolog FAQ:    https://www.swi-prolog.org/FAQ/
+Learn Prolog:      http://www.learnprolognow.org/
+
+════════════════════════════════════════════════════════════════════
+Course: IF4070 - Representasi Pengetahuan dan Penalaran
+Assignment: Tugas 1 - College Course Ontology
+════════════════════════════════════════════════════════════════════
