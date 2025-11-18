@@ -4,106 +4,95 @@
 
 📚 LOADING FILES
 ────────────────────────────────────────────────────────────────────
-?- [college_course_rules].      % Load main rules
-?- [test_queries].              % Load tests
-?- quick_start.                 % Show quick start menu
+?- [main].                      % Load the main system
+?- init.                        % IMPORTANT: Load RDF data
+?- [test].                      % Load the test suite (optional)
+?- menu.                        % Show the main menu
 
 🔍 BASIC QUERIES
 ────────────────────────────────────────────────────────────────────
-?- list_all_courses.                              % List all courses
-?- print_statistics.                              % Show stats
-?- course_info('EB2101').                        % Course details
-?- course('EB2101', Name, Credits).              % Get course data
+?- list_all_courses.            % List all courses
+?- print_statistics.              % Show stats
+?- course_info('EB2101').        % Course details
+?- course('EB2101', Name, Credits). % Get course data
 
 🔎 SEARCH & FILTER
 ────────────────────────────────────────────────────────────────────
 ?- search_course_by_name('Biomedis', Results).   % Search by name
-?- courses_at_level('Third Year', Courses).      % Filter by level
+?- courses_at_level('Third Year', Courses).     % Filter by level
 ?- courses_in_department('Biomedical Engineering', Courses).
 ?- courses_with_credits(3, Courses).             % Filter by credits
 
 📊 CATEGORIZATION
 ────────────────────────────────────────────────────────────────────
-?- course_level('EB2101', Level).                % Get course level
-?- course_department('EB2101', Dept).            % Get department
-?- is_practical_course('EB2209').                % Check if practical
-?- is_thesis_course('EB4090').                   % Check if thesis
-?- is_heavy_course('EL2001').                    % Check if 4+ credits
-?- is_light_course('EL1200').                    % Check if <= 2 credits
+?- course_level('EB2101', Level).            % Get course level
+?- course_department('EB2101', Dept).        % Get department
+?- is_practical_course('IF4090').            % Check if practical
+?- is_thesis_course('EB4090').               % Check if thesis
+?- is_heavy_course('IF3170').                % Check if 4+ credits
+?- is_light_course('EB2101').                % Check if <= 2 credits
 
 💳 CREDIT CALCULATIONS
 ────────────────────────────────────────────────────────────────────
-?- total_credits(['EB2101', 'EB2102'], Total).   % Sum credits
-?- meets_credit_requirement([...], 144).         % Check requirement
-
-📋 PREREQUISITES
-────────────────────────────────────────────────────────────────────
-?- prerequisite('EL3010', PreReq).               % Get prerequisites
-?- can_take_course('EL3010', ['EL2007']).       % Check eligibility
-?- suggest_next_courses(['EL1200'], 'Third Year', Suggestions).
+?- total_credits(['EB2101', 'EB2102'], Total). % Sum credits
+?- meets_credit_requirement([...], 144).     % Check requirement
 
 🧪 TESTING
 ────────────────────────────────────────────────────────────────────
-?- test_all.                                     % Run all tests
-?- test_basic_queries.                          % Test basics
-?- test_course_categorization.                  % Test categories
-?- test_credit_calculations.                    % Test credits
-?- test_prerequisites.                          % Test prereqs
-?- test_search_functions.                       % Test search
-?- run_all_scenarios.                           % Run scenarios
+?- test_all.                     % Run all tests (auto-runs init)
+?- test_basic_queries.           % Test basics
+?- test_course_categorization.   % Test categories
+?- test_credit_calculations.     % Test credits
+?- test_search_functions.        % Test search
+?- run_all_scenarios.            % Run scenarios
 
 📝 USAGE SCENARIOS
 ────────────────────────────────────────────────────────────────────
-?- scenario_plan_semester.                       % Plan courses
-?- scenario_check_graduation.                    % Check credits
-?- scenario_find_by_topic.                      % Find by topic
-?- scenario_analyze_load.                       % Analyze workload
+?- scenario_check_graduation.    % Check credits
+?- scenario_find_by_topic.       % Find by topic
+?- scenario_analyze_load.        % Analyze workload
 
 📈 STATISTICS & LISTING
 ────────────────────────────────────────────────────────────────────
 ?- list_courses_by_department('Biomedical Engineering').
-?- list_courses_by_department('Electrical Engineering').
+?- list_courses_by_department('Informatics').
 ?- findall(C, is_practical_course(C), Practical).
 ?- findall(C, is_thesis_course(C), Thesis).
 
 🔧 UTILITY
 ────────────────────────────────────────────────────────────────────
-?- listing(course).                              % Show all courses
-?- listing(prerequisite).                        % Show prerequisites
-?- working_directory(CWD, CWD).                 % Check directory
-?- help.                                        % Prolog help
-?- halt.                                        % Exit Prolog
+?- listing(course).              % Show all loaded course facts
+?- listing(degree).              % Show all loaded degree facts
+?- working_directory(CWD, CWD).  % Check directory
+?- help.                         % Prolog help
+?- halt.                         % Exit Prolog
 
 ➕ ADDING DATA
 ────────────────────────────────────────────────────────────────────
 ?- assertz(course('NEW123', 'New Course', 4)).
-?- assertz(prerequisite('ADV101', 'BASIC101')).
 
 🎯 COURSE ID FORMAT
 ────────────────────────────────────────────────────────────────────
 XX Y ZZZ
 ││ │ └── Course number
-││ └──── Level: 1-4 (Undergrad), 5/7 (Masters), 8 (Doctoral)
+││ └──── Level: 1-4 (Undergrad), 5/6/7 (Masters), 8 (Doctoral)
 │└────── Department code
-└─────── EB = Biomedical, EL = Electrical, EI = Graduate
+└─────── Department prefix
 
-Examples:
-  EB2101 = Biomedical Engineering, Year 2, Course 101
-  EL3010 = Electrical Engineering, Year 3, Course 010
-  EI7001 = Graduate Electrical, Masters level
+Codes: EB, EL, EP, ET, II, IF, EI
+(Used by rules to derive department/level)
 
 📚 SAMPLE COURSES
 ────────────────────────────────────────────────────────────────────
 Biomedical:
   EB2101 - Dasar Teknik Biomedis (2 credits)
-  EB3103 - Pengolahan Sinyal Biomedis (3 credits)
   EB4090 - Tugas Akhir (4 credits)
-
 Electrical:
   EL2001 - Rangkaian Elektrik (4 credits)
   EL3010 - Pengolahan Sinyal Digital (3 credits)
-  EL4091 - Tugas Akhir (3 credits)
-
+Informatics:
+  IF2110 - Algoritma dan Pemrograman 2 (3 credits)
+  IF3170 - Inteligensi Artifisial (4 credits)
 Graduate:
   EI7001 - Kendali Optimal & Kokoh (4 credits)
   EI7011 - Metodologi Penelitian (3 credits)
@@ -128,19 +117,19 @@ Graduate:
 🚀 QUICK START EXAMPLE
 ────────────────────────────────────────────────────────────────────
 % 1. Load the system
-?- [college_course_rules].
+?- [main].
 
-% 2. View statistics
+% 2. Initialize the database
+?- init.
+
+% 3. View statistics
 ?- print_statistics.
 
-% 3. Search for a topic
+% 4. Search for a topic
 ?- search_course_by_name('Sinyal', Results).
 
-% 4. Get course details
+% 5. Get course details
 ?- course_info('EB3103').
-
-% 5. Plan next semester
-?- suggest_next_courses(['EB2101', 'EB2102'], 'Third Year', S).
 
 % 6. Calculate credits
 ?- total_credits(['EB2101', 'EB2102', 'EB2103'], Total).
@@ -149,11 +138,13 @@ Graduate:
 ────────────────────────────────────────────────────────────────────
 Problem: File not found
 Solution: ?- working_directory(CWD, CWD).
-         Check you're in the right directory
+         Check you're in the right directory.
+         Use ?- [main]. or ?- ['path/to/main.pl'].
 
-Problem: No results
-Solution: ?- listing(course).
-         Verify courses are loaded
+Problem: No results / "Loaded 0 courses"
+Solution: 1. Did you run "init." first?
+         2. ?- listing(course). (Verify courses are loaded)
+         3. Check namespace in rdf_loader.pl
 
 Problem: Syntax error
 Solution: Check for missing periods (.) and parentheses
@@ -165,9 +156,12 @@ Solution: ?- trace.  % Enable debugging
 📖 DOCUMENTATION FILES
 ────────────────────────────────────────────────────────────────────
 - README.md              : Main project overview
-- README_PROLOG.md       : Detailed Prolog guide
-- SOLUTION_SUMMARY.md    : Complete documentation
-- QUICK_REFERENCE.txt    : This file
+- college-course.rdf   : The ontology knowledge base (ABox)
+- main.pl              : Main system entry point
+- rdf_loader.pl        : Module for loading RDF facts
+- course_rules.pl      : Module for classification rules (TBox)
+- queries.pl           : Module for user queries
+- test.pl              : Test suite file
 
 🎓 COMMON TASKS
 ────────────────────────────────────────────────────────────────────
@@ -178,10 +172,6 @@ Task: Find all biomedical courses
 Task: Check if can graduate
 ?- StudentCourses = ['EB2101', 'EB2102', ...],
    meets_credit_requirement(StudentCourses, 144).
-
-Task: Find courses I can take
-?- Completed = ['EL1200', 'EL2001'],
-   suggest_next_courses(Completed, 'Third Year', Next).
 
 Task: Analyze my semester
 ?- Planned = ['EB3101', 'EB3102', 'EB3103'],

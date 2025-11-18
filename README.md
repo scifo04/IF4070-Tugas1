@@ -37,10 +37,12 @@ IF4070-Tugas1/
 │       └── rules.txt               # Rule references
 │   └── facts/
 │       └── college-course.rdf      # RDF ontology
-│   ├── rules.pl                    # Main engine
-│   └── test.pl                     # Tests & examples
+│   └── main.pl                     # Main system entry point    
+│   └── queries.pl                  # Module for user queries
+│   ├── course_rules.pl             # rdf ontology knowledge base                   
+│   └── rdf_loader.pl               # module for loading rdf facts    
+│   └── test.pl                     # Test
 ```
-
 ---
 
 ## 🚀 Quick Start
@@ -60,11 +62,14 @@ swipl
 ```
 
 ```prolog
-% Load the main rules file
-?- [rules].
+% 1. Load the main system
+?- [main].
 
-% View quick start menu
-?- quick_start.
+% 2. IMPORTANT: Initialize the database
+?- init.
+
+% 3. View the menu
+?- menu.
 
 % View all courses
 ?- list_all_courses.
@@ -75,7 +80,7 @@ swipl
 % Get course information
 ?- course_info('EB2101').
 
-% Run tests (optional)
+% Run tests (optional, loads main.pl and runs init automatically)
 ?- [test].
 ?- test_all.
 ```
@@ -86,55 +91,42 @@ swipl
 
 ### 1. Course Data Model
 
-#### Core Facts
+#### Core Facts (Loaded via `init.`)
 ```prolog
 % Course information
 course(CourseID, CourseName, Credits).
 course('EB2101', 'Dasar Teknik Biomedis', 2).
-course('EL3010', 'Pengolahan Sinyal Digital', 3).
+course('IF2110', 'Algoritma dan Pemrograman 2', 3).
 
 % Degree information
 degree(DegreeID, DegreeName).
-degree('sarjana_tb', 'Sarjana Teknik Biomedis').
-
-% Prerequisites
-prerequisite(Course, RequiredCourse).
-prerequisite('EL3010', 'EL2007').
+degree('S.T.', 'S.T.').
 ```
 
 #### Sample Courses
 
-**Biomedical Engineering (EB)**
+**Biomedical Engineering (EB)** [cite: 8-30]
 - EB2101 - Dasar Teknik Biomedis (2 credits)
-- EB2102 - Rangkaian Elektrik dan Elektronika (3 credits)
-- EB2103 - Sistem Digital dan Mikroprosesor (3 credits)
-- EB2201 - Anatomi dan Fisiologi Manusia (3 credits)
-- EB2203 - Sinyal dan Sistem (3 credits)
-- EB2209 - Praktikum Elektronika dan Rangkaian (1 credit)
-- EB3101 - Instrumentasi Biomedis I (3 credits)
 - EB3103 - Pengolahan Sinyal Biomedis (3 credits)
-- EB3203 - Pengolahan Citra Biomedis (3 credits)
 - EB4090 - Tugas Akhir (4 credits)
 
-**Electrical Engineering (EL)**
-- EL1200 - Pengantar Analisis Rangkaian (2 credits)
+**Informatics (IF)** [cite: 230-264]
+- IF2110 - Algoritma dan Pemrograman 2 (3 credits)
+- IF3170 - Inteligensi Artifisial (4 credits)
+- IF4092 - Tugas Akhir (4 credits)
+
+**Electrical Engineering (EL)** [cite: 49-84]
 - EL2001 - Rangkaian Elektrik (4 credits)
-- EL2002 - Rangkaian Elektronika (3 credits)
-- EL2003 - Sistem Digital (3 credits)
-- EL2005 - Dasar Sistem Telekomunikasi (3 credits)
-- EL2007 - Sinyal dan Sistem (3 credits)
-- EL3009 - Elektronika II (3 credits)
 - EL3010 - Pengolahan Sinyal Digital (3 credits)
-- EL3011 - Arsitektur Sistem Komputer (3 credits)
 - EL4091 - Tugas Akhir (3 credits)
 
-**Graduate Courses (EI)**
+**Graduate Courses (EI/IF)** [cite: 31-48, 265-332]
 - EI7001 - Kendali Optimal & Kokoh (4 credits)
-- EI7004 - Kendali & Sistem Cerdas (4 credits)
-- EI7011 - Metodologi Penelitian (3 credits)
-- EI8090 - Disertasi (20 credits)
+- IF5001 - Metodologi Penelitian (3 credits)
 
 ### 2. Course Categorization Rules
+
+Rules in `course_rules.pl` derive categories by parsing Course IDs and Names.
 
 #### Department Classification
 ```prolog
@@ -144,13 +136,13 @@ course_department(CourseID, Department).
 ?- course_department('EB2101', Dept).
 Dept = 'Biomedical Engineering'.
 
-?- course_department('EL3010', Dept).
-Dept = 'Electrical Engineering'.
+?- course_department('IF3170', Dept).
+Dept = 'Informatics'.
 ```
 
 #### Level Classification
 ```prolog
-% Determine academic level
+% Determine academic level from course ID
 course_level(CourseID, Level).
 
 ?- course_level('EB2101', Level).
@@ -165,34 +157,34 @@ Levels:
 - **Second Year**: Level 2 courses
 - **Third Year**: Level 3 courses
 - **Fourth Year**: Level 4 courses
-- **Masters**: Level 5 or 7 courses
+- **Masters**: Level 5, 6, or 7 courses
 - **Doctoral**: Level 8 courses
 
 #### Type Classification
 ```prolog
-% Check if practical/lab course
+% Check if practical/lab course (from name)
 is_practical_course(CourseID).
-?- is_practical_course('EB2209').
+?- is_practical_course('IF4090').
 true.
 
-% Check if thesis/final project
+% Check if thesis/final project (from name)
 is_thesis_course(CourseID).
 ?- is_thesis_course('EB4090').
 true.
 
-% Check if elective course
+% Check if elective course (from name)
 is_elective_course(CourseID).
-?- is_elective_course('EB3205').
+?- is_elective_course('IF4085').
 true.
 
 % Check if heavy course (4+ credits)
 is_heavy_course(CourseID).
-?- is_heavy_course('EL2001').
+?- is_heavy_course('IF3170').
 true.
 
 % Check if light course (<= 2 credits)
 is_light_course(CourseID).
-?- is_light_course('EL1200').
+?- is_light_course('EB2101').
 true.
 ```
 
@@ -201,50 +193,30 @@ true.
 ```prolog
 % Calculate total credits for course list
 total_credits(CourseList, Total).
-?- total_credits(['EB2101', 'EB2102', 'EB2103'], Total).
+?- total_credits(['EB2101', 'IF2110', 'IF1210'], Total).
 Total = 8.
 
 % Check if credit requirement is met
 meets_credit_requirement(CourseList, MinCredits).
-?- meets_credit_requirement(['EB2101', 'EB2102', 'EB2103'], 8).
+?- meets_credit_requirement(['...'], 144).
 true.
 ```
 
-### 4. Prerequisite System
-
-```prolog
-% Define prerequisites
-prerequisite('EL3010', 'EL2007').
-prerequisite('EL3009', 'EL2005').
-
-% Check if student can take course
-can_take_course(CourseID, CompletedCourses).
-?- can_take_course('EL3010', ['EL2007']).
-true.
-
-?- can_take_course('EL3010', ['EL2001']).
-false.
-
-% Verify all prerequisites completed
-all_completed(RequiredCourses, CompletedCourses).
-?- all_completed(['EL2007'], ['EL1200', 'EL2001', 'EL2007']).
-true.
-```
-
-### 5. Search & Discovery
+### 4. Search & Discovery
 
 ```prolog
 % Search courses by name keyword
 search_course_by_name(Keyword, Results).
-?- search_course_by_name('Biomedis', Results).
+?- search_course_by_name('Basis Data', Results).
 Results = [
-    ('EB2101', 'Dasar Teknik Biomedis', 2),
-    ('EB3103', 'Pengolahan Sinyal Biomedis', 3)
+    ('IF2040', 'Pemodelan Basis Data', 3),
+    ('IF2240', 'Basis Data', 3),
+    ('IF3140', 'Sistem Basis Data', 3)
 ].
 
 % Find courses by department
 courses_in_department(Department, Courses).
-?- courses_in_department('Biomedical Engineering', Courses).
+?- courses_in_department('Informatics', Courses).
 
 % Find courses by level
 courses_at_level(Level, Courses).
@@ -252,70 +224,65 @@ courses_at_level(Level, Courses).
 
 % Find courses with specific credits
 courses_with_credits(Credits, Courses).
-?- courses_with_credits(3, Courses).
+?- courses_with_credits(4, Courses).
 ```
 
-### 6. Academic Planning
+### 5. Academic Planning
 
 ```prolog
-% Suggest next semester courses
-suggest_next_courses(CompletedCourses, Level, Suggestions).
-?- suggest_next_courses(['EL1200', 'EL2001'], 'Third Year', S).
-S = ['EL3009', 'EL3010', 'EL3011', ...].
-
 % Get detailed course information
 course_info(CourseID).
-?- course_info('EB3103').
-Course ID: EB3103
-Course Name: Pengolahan Sinyal Biomedis
-Credits: 3
-Level: Third Year
-Department: Biomedical Engineering
+?- course_info('IF3170').
+
+Course ID: IF3170
+Course Name: Inteligensi Artifisial
+Credits: 4
+Level (derived): Third Year
+Department (derived): Informatics
+Type (derived): Mandatory Course
 ```
 
-### 7. Statistics & Reporting
+### 6. Statistics & Reporting
 
 ```prolog
 % Print overall statistics
 print_statistics.
 ?- print_statistics.
-=== Course Statistics ===
-Total Courses: 60+
-Biomedical Engineering Courses: 20+
-Electrical Engineering Courses: 25+
-Practical/Lab Courses: 10+
+
+=== Knowledge Base Statistics ===
+Total Courses: 349
+Total Degrees: 3
+Practical Courses (derived): 17
 
 % List all courses
 list_all_courses.
 
 % List courses by department
 list_courses_by_department(Department).
-?- list_courses_by_department('Biomedical Engineering').
+?- list_courses_by_department('Informatics').
 ```
 
 ---
 
 ## 🎯 Course ID Format
 
-Understanding the course code structure:
+Understanding the course code structure is key, as rules depend on it.
 
 ```
 XX Y ZZZ
 ││ │ └── Course number (001-999)
-││ └──── Level (1-4: Undergrad, 5/7: Masters, 8: Doctoral)
+││ └──── Level (1-4: Undergrad, 5/6/7: Masters, 8: Doctoral)
 │└────── Department code
-└─────── First letter of department
+└─────── Department prefix
 
 Department Codes:
-- EB = Biomedical Engineering (Teknik Biomedis)
-- EL = Electrical Engineering (Teknik Elektro)
+- EB = Biomedical Engineering
+- EL = Electrical Engineering
+- EP = Electrical Power Engineering
+- ET = Telecommunication Engineering
+- II = Information Systems and Technology
+- IF = Informatics
 - EI = Graduate Electrical Engineering
-- IF = Informatics (Teknik Informatika)
-
-Examples:
-- EB2101 = Biomedical, Year 2, Course 101
-- EL3010 = Electrical, Year 3, Course 010
-- EI7001 = Graduate Electrical, Masters level
 ```
 
 ---
@@ -329,41 +296,24 @@ Results = [
     ('EB2203', 'Sinyal dan Sistem', 3),
     ('EL2007', 'Sinyal dan Sistem', 3),
     ('EB3103', 'Pengolahan Sinyal Biomedis', 3),
-    ('EL3010', 'Pengolahan Sinyal Digital', 3)
+    ...
 ].
 ```
 
-### Example 2: Plan Semester Courses
+### Example 2: Analyze Course Load
 ```prolog
-?- suggest_next_courses(['EL1200', 'EL2001'], 'Third Year', Suggestions),
-   total_credits(Suggestions, Total).
-Suggestions = ['EL3009', 'EL3010', 'EL3011', ...],
-Total = 24.
-```
-
-### Example 3: Check Prerequisites
-```prolog
-?- prerequisite('EL3010', PreReq).
-PreReq = 'EL2007'.
-
-?- can_take_course('EL3010', ['EL2007']).
-true.
-```
-
-### Example 4: Analyze Course Load
-```prolog
-?- Courses = ['EB3101', 'EB3102', 'EB3103', 'EB3109'],
+?- Courses = ['IF3110', 'IF3130', 'IF3140', 'IF3170'],
    total_credits(Courses, Total),
    findall(C, (member(C, Courses), is_heavy_course(C)), Heavy),
    findall(P, (member(P, Courses), is_practical_course(P)), Practical),
    length(Heavy, NumHeavy),
    length(Practical, NumPractical).
-Total = 11,
-NumHeavy = 0,
-NumPractical = 1.
+Total = 13,
+NumHeavy = 1,
+NumPractical = 0.
 ```
 
-### Example 5: Find All Thesis Courses
+### Example 3: Find All Thesis Courses
 ```prolog
 ?- findall((ID, Name, Credits), 
            (is_thesis_course(ID), course(ID, Name, Credits)), 
@@ -371,18 +321,20 @@ NumPractical = 1.
 Theses = [
     ('EB4090', 'Tugas Akhir', 4),
     ('EL4091', 'Tugas Akhir', 3),
-    ('EI8090', 'Disertasi', 20)
+    ('ET4202', 'Tugas Akhir II', 4),
+    ('IF4092', 'Tugas Akhir', 4),
+    ('II4092', 'Tugas Akhir', 4)
 ].
 ```
 
-### Example 6: Count Courses by Department
+### Example 4: Count Courses by Department
 ```prolog
-?- findall(C, course_department(C, 'Biomedical Engineering'), BM),
-   length(BM, BMCount),
-   findall(C, course_department(C, 'Electrical Engineering'), EL),
-   length(EL, ELCount).
-BMCount = 20,
-ELCount = 25.
+?- findall(C, course_department(C, 'Informatics'), IF),
+   length(IF, IFCount),
+   findall(C, course_department(C, 'Biomedical Engineering'), EB),
+   length(EB, EBCount).
+IFCount = 78,
+EBCount = 31.
 ```
 
 ---
@@ -394,54 +346,50 @@ ELCount = 25.
 The project includes comprehensive tests in `test.pl`:
 
 ```prolog
-% Load test suite
-?- [test_queries].
+% Load test suite (this also loads main.pl)
+?- [test].
 
-% Run all tests
+% Run all tests (will run init automatically if needed)
 ?- test_all.
 
 Individual test categories:
 ?- test_basic_queries.              % Basic course queries
 ?- test_course_categorization.      % Department/level/type
 ?- test_credit_calculations.        % Credit totaling
-?- test_prerequisites.              % Prerequisite checking
 ?- test_search_functions.           % Search operations
 ```
 
 ### Usage Scenarios
 
-Four real-world scenarios are included:
+Three real-world scenarios are included:
 
 ```prolog
-% Scenario 1: Plan next semester
-?- scenario_plan_semester.
-=== SCENARIO: Plan Semester ===
-Student has completed: EL1200, EL2001
-Looking for Third Year courses...
-Suggested courses:
-  - EL3009: Elektronika II (3 credits)
-  - EL3010: Pengolahan Sinyal Digital (3 credits)
+% Run all scenarios
+?- run_all_scenarios.
 
-% Scenario 2: Check graduation readiness
+% Scenario 1: Check graduation readiness
 ?- scenario_check_graduation.
 === SCENARIO: Check Graduation Requirements ===
-Student courses: [...144 credits...]
-✓ Meets graduation requirement of 144 credits
+Checking if student meets 144 credit minimum...
+...
+✗ Student needs 130 more credits
 
-% Scenario 3: Find courses by topic
+% Scenario 2: Find courses by topic
 ?- scenario_find_by_topic.
 === SCENARIO: Find Courses by Topic ===
-Searching for 'Sistem' courses...
-Found 5 courses containing 'Sistem'
+Student interested in "Jaringan" (Network)...
+Found courses:
+   - ET2104: Jaringan Komputer (3 credits)
+   - IF2230: Jaringan Komputer (3 credits)
+   ...
 
-% Scenario 4: Analyze workload
+% Scenario 3: Analyze workload
 ?- scenario_analyze_load.
 === SCENARIO: Analyze Course Load ===
-Proposed semester: EB3101, EB3102, EB3103, EB3109
-Total credits: 11
-Heavy courses: 0
-Practical courses: 1
-✓ Moderate course load
+Proposed semester courses: IF3110, IF3130, IF3140, IF3170
+Total credits: 13
+Heavy courses (4+ credits): 1
+Practical courses: 0
 ```
 
 ---
@@ -453,10 +401,9 @@ Practical courses: 1
 The `facts/college-course.rdf` file contains:
 
 **Classes:**
-- Courses
-- Degrees (Sarjana, Magister, Doktor)
-- Majors (Biomedis, Elektro, Informatika)
-- Semesters
+- Courses, Majors, Degree
+- BacheloralDegree, MasterDegree, DoctoralDegree
+- CourseCategory, GradingCategory, Semester, Year
 
 **Properties:**
 - hasCourseID
@@ -483,13 +430,16 @@ The `facts/college-course.rdf` file contains:
 </owl:NamedIndividual>
 ```
 
-### Loading RDF (Optional)
+### Loading RDF
+
+The RDF data is **not** loaded automatically. You **must** run `init.` after loading `[main].` to populate the knowledge base.
 
 ```prolog
-% Load courses from RDF file
-?- load_rdf_facts.
+% Load the system
+?- [main].
 
-% Note: Requires SWI-Prolog SGML/XML library
+% Load the data
+?- init.
 ```
 
 ---
@@ -499,30 +449,14 @@ The `facts/college-course.rdf` file contains:
 ### Adding New Courses
 
 ```prolog
-% Add single course
+% Add single course temporarily
 ?- assertz(course('NEW123', 'New Course Name', 4)).
-
-% Add multiple courses
-?- assertz(course('CS101', 'Intro to CS', 3)),
-   assertz(course('CS102', 'Data Structures', 4)),
-   assertz(course('CS201', 'Algorithms', 4)).
 ```
-
-### Adding Prerequisites
-
-```prolog
-% Add prerequisite relationship
-?- assertz(prerequisite('CS201', 'CS102')).
-?- assertz(prerequisite('CS102', 'CS101')).
-
-% Verify prerequisite chain
-?- prerequisite('CS201', P1),
-   prerequisite(P1, P2).
-P1 = 'CS102',
-P2 = 'CS101'.
-```
+(To add courses permanently, add them to the `college-course.rdf` file via Protégé).
 
 ### Creating Custom Rules
+
+You can add new rules to `course_rules.pl` or `queries.pl`.
 
 ```prolog
 % Find all AI-related courses
@@ -530,27 +464,9 @@ ai_courses(Courses) :-
     findall(ID, (
         course(ID, Name, _),
         (sub_atom(Name, _, _, _, 'AI');
-         sub_atom(Name, _, _, _, 'Intelijen');
-         sub_atom(Name, _, _, _, 'Machine Learning'))
+         sub_atom(Name, _, _, _, 'Inteligensi');
+         sub_atom(Name, _, _, _, 'Cerdas'))
     ), Courses).
-
-% Find courses suitable for semester
-light_semester(Courses) :-
-    findall(ID, (
-        course(ID, _, Credits),
-        Credits =< 3,
-        \+ is_thesis_course(ID)
-    ), Courses).
-
-% Check if course path is valid
-valid_course_path(Path) :-
-    Path = [First|Rest],
-    valid_path_helper(First, Rest).
-
-valid_path_helper(_, []).
-valid_path_helper(Current, [Next|Rest]) :-
-    (prerequisite(Next, Current) ; \+ prerequisite(Next, _)),
-    valid_path_helper(Next, Rest).
 ```
 
 ---
@@ -567,13 +483,13 @@ valid_path_helper(Current, [Next|Rest]) :-
 ?- print_statistics.
 
 % Course information
-?- course_info('EB2101').
+?- course_info('IF2110').
 
 % Raw course data
-?- course('EB2101', Name, Credits).
+?- course('IF2110', Name, Credits).
 
 % List by department
-?- list_courses_by_department('Biomedical Engineering').
+?- list_courses_by_department('Informatics').
 ```
 
 ### Search & Filter
@@ -593,56 +509,35 @@ valid_path_helper(Current, [Next|Rest]) :-
 
 % Combined filter
 ?- courses_at_level('Third Year', L3),
-   courses_in_department('Biomedical Engineering', BM),
-   intersection(L3, BM, Results).
+   courses_in_department('Informatics', IF),
+   intersection(L3, IF, Results).
 ```
 
 ### Categorization
 
 ```prolog
 % Get level
-?- course_level('EB2101', Level).
+?- course_level('IF2110', Level).
 
 % Get department
-?- course_department('EL3010', Dept).
+?- course_department('IF3170', Dept).
 
 % Check types
-?- is_practical_course('EB2209').
-?- is_thesis_course('EB4090').
-?- is_elective_course('EB3205').
-?- is_heavy_course('EL2001').
-?- is_light_course('EL1200').
+?- is_practical_course('IF4090').
+?- is_thesis_course('IF4092').
+?- is_elective_course('IF4085').
+?- is_heavy_course('IF3170').
+?- is_light_course('IF4090').
 ```
 
 ### Credits
 
 ```prolog
 % Calculate total
-?- total_credits(['EB2101', 'EB2102', 'EB2103'], Total).
+?- total_credits(['IF2110', 'IF2120', 'IF2130'], Total).
 
 % Check requirement
 ?- meets_credit_requirement(CourseList, 144).
-
-% Find heavy semester
-?- Courses = ['EL2001', 'EL2002', 'EL2003', 'EL2007'],
-   total_credits(Courses, Total),
-   Total > 16.
-```
-
-### Prerequisites
-
-```prolog
-% Check eligibility
-?- can_take_course('EL3010', ['EL2007']).
-
-% Get prerequisites
-?- prerequisite('EL3010', PreReq).
-
-% Suggest next courses
-?- suggest_next_courses(['EL1200', 'EL2001'], 'Third Year', S).
-
-% Check all prerequisites
-?- all_completed(['EL2007'], ['EL1200', 'EL2001', 'EL2007']).
 ```
 
 ### Advanced Queries
@@ -657,10 +552,6 @@ valid_path_helper(Current, [Next|Rest]) :-
 % Count by category
 ?- findall(C, is_practical_course(C), P),
    length(P, PracticalCount).
-
-% Course dependency chain
-?- prerequisite('AdvCourse', Mid),
-   prerequisite(Mid, Basic).
 
 % Workload analysis
 ?- findall(C, is_heavy_course(C), Heavy),
@@ -680,28 +571,23 @@ valid_path_helper(Current, [Next|Rest]) :-
 ?- working_directory(CWD, CWD).
 
 % Change directory if needed
-?- working_directory(_, 'd:/My Stuff/ITB Files/Semester VII/RPP/tubes/IF4070-Tugas1').
+?- working_directory(_, 'D:/path/to/IF4070-Tugas1').
 
 % Reload file
-?- [rules].
+?- [main].
 ```
 
-**Problem**: No results from queries
+**Problem**: No results from queries / `Loaded 0 courses`
 ```prolog
-% Verify courses are loaded
+% 1. Did you run "init." first? This is required.
+?- init.
+
+% 2. Verify courses are loaded
 ?- listing(course).
 
-% Check how many courses
-?- findall(C, course(C, _, _), All), length(All, Count).
-```
-
-**Problem**: Prerequisite check fails
-```prolog
-% List all prerequisites
-?- listing(prerequisite).
-
-% Check specific prerequisite
-?- prerequisite('EL3010', P).
+% 3. Check namespace in rdf_loader.pl
+%    It MUST match the 'xmlns:college-course'
+%    tag in your college-course.rdf file.
 ```
 
 **Problem**: Unexpected behavior
@@ -722,7 +608,6 @@ valid_path_helper(Current, [Next|Rest]) :-
 % Use semicolon to see more results
 ?- course(ID, Name, 3).
 ID = 'EB2102', Name = 'Rangkaian Elektrik dan Elektronika' ;
-ID = 'EB2103', Name = 'Sistem Digital dan Mikroprosesor' ;
 ...
 
 % Use period to stop after first result
